@@ -60,7 +60,7 @@ loop 标号
 CPU执行loop指令时,进行两步操作
 
 1. (cx)=(cx)-1;将CX内容减一
-2. 判断cx的值.为零,则向下执行,否则跳到标号处执行程序
+2. 判断cx的值.为零,则向下执行,否则跳到标号处执行
 
 ### Example:计算2^12
 
@@ -82,3 +82,93 @@ code ends
 
 end
 ```
+
+总结:cx中存放循环次数,loop和标号之间存放循环体
+
+## 5.3 在Debug中跟踪用loop指令实现的循环程序
+
+Q:计算ffff:0006单元中的数乘以3,结果储存在dx  
+A:  
+一个内存单元中的数乘以三不会大于两个字节,不会超过dx的存储范围  
+使用loop来将目标单元中的内容add两次  
+由于目标内存单元为一个字节,寄存器为两个字节,所以我们将目标内存的值储存在al中,将ah置零,但是使用ax进行add操作,因为(ax)在这个时候等于(al)  
+以下是汇编代码
+
+```assembly
+assume cs:code
+code segment
+    mov ax,0ffffh
+    mov ds,ax
+    mov bx,6
+    mov al,[bx]
+    mov ah,0
+    mov dx,0
+
+    mov cx,3
+    s:  add dx,ax
+
+    mov ax,4c00h
+    int 21h
+code ends
+end
+```
+
+使用p命令执行loop可以一次性执行完这个loop  
+使用g命令+偏移地址的方式可以将程序执行到指定位置处
+
+## 5.4 Debug和汇编编译器masm对指令的不同处理
+
+在Debug中  
+mov ax,[0]  
+表示将ds:0处的数据送入ax  
+在汇编源程序中,以上命令被当作"mov ax,0"
+
+如何解决这个差异造成的不一致呢,使用bx和[bx]
+
+## 5.5 loop和[bx]联合应用
+
+Q:计算ffff:0000~ffff:b单元中数据的和  
+A:分析  
+这bH个单元中的和不会超过一个寄存器的最大范围,可以用寄存器来储存结果,放在dx中  
+由于单个字节相加会导致溢出,因此不能使用al这类八位寄存器  
+用16位寄存器储存八位的单个字节,然后将16位寄存器的值相加  
+程序如下
+
+```assembly
+assume cs:code
+code segment
+
+    mov ax,0ffffh
+    mov ds,ax
+
+    mov dx,0
+    mov ah,0
+    mov bx,0
+    mov cx,0ch
+    s:  mov al,[bx]
+        inc bx
+        add dx,ax
+    loop s
+
+    mov ax,4c00H
+    int 21H
+
+code ends
+end
+```
+
+## 段前缀
+
+在"mov ax,[0]"中,段地址默认在ds中,也可以显式指出段地址所在的段寄存器,比如  
+mov ax,es:[2]  
+mov ax,ss:[bx]  
+mov ax,cs:[bx]  
+mov ax,ss:[0]
+
+## 5.7 一段安全的空间
+
+内存中可能存放着重要的代码(不属于自身的代码),随意修改任意内存可能导致错误
+
+安全的空间:0:200~0:2ff,这256个字节的空间认为是安全的
+
+> 实验四的第三题,为什么要有多余的mov cx,cx呢?
