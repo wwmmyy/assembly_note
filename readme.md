@@ -7,3 +7,4 @@
 + [第三章:寄存器(内存访问)](./chapter_03/note.md)
 + [第四章:第一个程序](./chapter_04/note.md)
 + [第五章:[bx]和loop指令](./chapter_05/note.md)
++ [第六章:包含多个段的程序](./chapter_06/note.md)
