@@ -9,3 +9,4 @@
 + [第五章:[bx]和loop指令](./chapter_05/note.md)
 + [第六章:包含多个段的程序](./chapter_06/note.md)
 + [第七章:更灵活的定位内存地址的方法](./chapter_07/note.md)
++ [第八章:数据处理的两个基本问题](./chapter_08/note.md)
