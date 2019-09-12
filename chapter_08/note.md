@@ -116,7 +116,7 @@ start:  mov ax,data
                     mov es:[bp],ax
                     mov ax,[bx].2
                     mov es:[bp].2,ax    ;年份
-                    
+
                     mov byte ptr es:[bp].4,' '     ;空格
 
                     mov ax,[si].0
